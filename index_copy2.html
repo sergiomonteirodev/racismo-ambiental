@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>GeoAR.js demo</title>
+    <script src='https://aframe.io/releases/0.9.2/aframe.min.js'></script>
+    <script src="https://raw.githack.com/jeromeetienne/AR.js/master/aframe/build/aframe-ar.min.js"></script>
+    <script src="https://raw.githack.com/donmccurdy/aframe-extras/master/dist/aframe-extras.loaders.min.js"></script>
+    <script>
+        THREEx.ArToolkitContext.baseURL = 'https://raw.githack.com/jeromeetienne/ar.js/master/three.js/'
+    </script>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+        }
+        a-scene {
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <a-scene
+        vr-mode-ui="enabled: false"
+		embedded
+        arjs='sourceType: webcam; sourceWidth:1280; sourceHeight:960; displayWidth: 1280; displayHeight: 960; debugUIEnabled: false;'
+        device-orientation-permission-ui="enabled: true">
+        
+        <!-- Câmera com gps-camera e sem look-controls -->
+        <a-camera gps-camera></a-camera>
+
+        <!-- Cursor para indicar a posição -->
+        <a-cursor raycaster="objects: .clickable"></a-cursor>
+
+        <!-- Modelo GLTF com posição fixa no ambiente -->
+        <a-entity gltf-model="./marcador/assets/barreira.gltf"
+                  scale="5 5 5"
+                  rotation="-90 0 0"
+                  position="0 -1 0" <!-- Ajuste vertical para posicionar rente ao chão -->
+                  gps-entity-place="longitude: -34.955120; latitude: -8.048860;"
+                  class="clickable">
+        </a-entity>
+
+        <!-- Eventos para controle de movimento -->
+        <script>
+            const cameraEl = document.querySelector('a-camera');
+            let touchStartX = 0;
+            let touchStartY = 0;
+
+            // Evento de início de toque
+            document.addEventListener('touchstart', function(event) {
+                touchStartX = event.touches[0].clientX;
+                touchStartY = event.touches[0].clientY;
+            });
+
+            // Evento de movimento de toque
+            document.addEventListener('touchmove', function(event) {
+                const touchEndX = event.touches[0].clientX;
+                const touchEndY = event.touches[0].clientY;
+
+                const deltaX = touchEndX - touchStartX;
+                const deltaY = touchEndY - touchStartY;
+
+                // Ajuste da posição da câmera com base no movimento do usuário
+                cameraEl.object3D.position.x += deltaX * 0.001;
+                cameraEl.object3D.position.z -= deltaY * 0.001;
+
+                touchStartX = touchEndX;
+                touchStartY = touchEndY;
+            });
+        </script>
+	</a-scene>
+</body>
+</html>

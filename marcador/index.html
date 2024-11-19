@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.1.4/dist/mindar-image.prod.js"></script>
+  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.1.4/dist/mindar-image-aframe.prod.js"></script>
+  <script src="https://unpkg.com/aframe-chromakey-material/dist/aframe-chromakey-material.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const gltfModel = document.querySelector('#gltfModel');
+      const videoEl = document.getElementById('video');
+      const button = document.getElementById('toggleBtn');
+      const sceneEl = document.querySelector('a-scene');
+      const mindarComponent = sceneEl.components['mindar-image'];
+      let isVideoPlaying = false;
+
+      function stopTargetTracking() {
+        if (mindarComponent) {
+          mindarComponent.stop();
+        }
+      }
+
+      function startTargetTracking() {
+        if (mindarComponent) {
+          mindarComponent.start();
+        }
+      }
+
+      button.addEventListener('click', function() {
+        if (isVideoPlaying) {
+          videoEl.pause();
+          videoEl.style.display = 'none';
+          gltfModel.setAttribute('visible', true);
+          button.textContent = 'Ver Vídeo';
+          startTargetTracking();
+        } else {
+          stopTargetTracking();
+          gltfModel.setAttribute('visible', false);
+          videoEl.style.display = 'block';
+          videoEl.play().catch(error => {
+            console.error('Erro ao reproduzir o vídeo:', error);
+          });
+          button.textContent = 'Mostrar Modelo 3D';
+        }
+        isVideoPlaying = !isVideoPlaying;
+      });
+    });
+  </script>
+  <style>
+    #video {
+      display: none;
+      width: 100vw; /* Largura igual a 100% da viewport */
+      height: 100vh; /* Altura igual a 100% da viewport */
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 10;
+      object-fit: cover; /* Garante que o vídeo preencha a tela sem distorção */
+    }
+
+    #toggleBtn {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 20px;
+      background-color: #ffd000;
+      color: black;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      z-index: 100;
+    }
+  </style>
+  <title>Observatorio Racismo Ambiental</title>
+</head>
+<body>
+  <button id="toggleBtn">Ver Vídeo</button>
+
+  <video id="video" controls>
+    <source src="assets/video.mp4" type="video/mp4">
+    Seu navegador não suporta a reprodução de vídeos.
+  </video>
+
+  <a-scene
+    mindar-image="imageTargetSrc: assets/targets.mind; filterMinCF: 0.001; filterBeta: 0.01"
+    color-space="sRGB"
+    renderer="colorManagement: true, physicallyCorrectLights"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: true">
+
+    <a-assets>
+      <a-asset-item id="avatarModel" src="assets/barreira.gltf"></a-asset-item>
+    </a-assets>
+
+    <a-camera position="0 0 1" look-controls="enabled: false"></a-camera>
+
+    <a-entity id="gltfModel" mindar-image-target="targetIndex:0" visible="true">
+      <a-gltf-model
+        src="#avatarModel"
+        scale="2 2 2" 
+        rotation="90 0 0"
+        position="0 0 0">
+      </a-gltf-model>
+    </a-entity>
+  </a-scene>
+</body>
+</html>
